@@ -1,4 +1,4 @@
-import random
+from random import randint
 
 
 class BoardOutException(Exception):
@@ -27,10 +27,7 @@ class Dot:
             raise DotTypeError("y value is out of bounds")
 
     def __eq__(self, other):
-        if self.x == other.x and self.y == other.y:
-            return True
-        else:
-            return False
+        return self.x == other.x and self.y == other.y
 
     def get_dot(self):
         return print(f'x: {self.x}; y: {self.y}')
@@ -44,6 +41,7 @@ class Ship:
         self.horizontal = horizontal
         self.lives = length
 
+    @property
     def dots(self):
         dot_list = []
         for i in range(self.length):
@@ -72,7 +70,7 @@ class Board:
         if length not in [1, 2, 3]:
             raise ValueError("Invalid length")
         # print("Adding a ship of length =", length)
-        bow = Dot(random.randint(1, 6), random.randint(1, 6))
+        bow = Dot(randint(1, 6), randint(1, 6))
         # bow.get_dot()
         if 1 > bow.x > 6:
             raise BoardOutException("x is out of bounds")
@@ -88,7 +86,7 @@ class Board:
             hor = False
             new_ship = Ship(length, bow, hor)
         else:
-            hor = bool(random.getrandbits(1))
+            hor = bool(randint(0, 1))
             for i in range(1, length):
                 if hor:
                     if bow.x - i < 1:
@@ -101,7 +99,7 @@ class Board:
                     elif self.char_map[bow.x][bow.y - i] != "O":
                         raise OccupiedDotException("Ship tries to occupy illegal dots")
             new_ship = Ship(length, bow, hor)
-        ship_dots = new_ship.dots()
+        ship_dots = new_ship.dots
         for i in ship_dots:
             # i.get_dot()
             self.char_map[i.x][i.y] = "■"
@@ -109,18 +107,15 @@ class Board:
         self.ships_intact += 1
 
     def contour(self, ship: Ship, char="T"):
-        ship_dots = ship.dots()
-        for i in ship_dots:
-            for j in [-1, 0, 1]:
-                if 1 <= i.y - 1 <= 6:
-                    if 1 <= i.x + j <= 6 and self.char_map[i.x + j][i.y - 1] not in ["■", "X"]:
-                        self.char_map[i.x + j][i.y - 1] = char
-                if 1 <= i.y <= 6:
-                    if 1 <= i.x + j <= 6 and self.char_map[i.x + j][i.y] not in ["■", "X"]:
-                        self.char_map[i.x + j][i.y] = char
-                if 1 <= i.y + 1 <= 6:
-                    if 1 <= i.x + j <= 6 and self.char_map[i.x + j][i.y + 1] not in ["■", "X"]:
-                        self.char_map[i.x + j][i.y + 1] = char
+        ship_dots = ship.dots
+        adjacent = [(-1, -1), (-1, 0), (-1, 1),
+                    (0, -1), (0, 0), (0, 1),
+                    (1, -1), (1, 0), (1, 1)]
+        for d in ship_dots:
+            for i, j in adjacent:
+                if 1 <= d.y + j <= 6:
+                    if 1 <= d.x + i <= 6 and self.char_map[d.x + i][d.y + j] not in ["■", "X"]:
+                        self.char_map[d.x + i][d.y + j] = char
 
     def board_print(self):
         print(" |1|2|3|4|5|6|")
@@ -136,10 +131,7 @@ class Board:
 
     @staticmethod
     def out(_dot: Dot):
-        if 1 <= _dot.x <= 6 and 1 <= _dot.y <= 6:
-            return False
-        else:
-            return True
+        return not(1 <= _dot.x <= 6 and 1 <= _dot.y <= 6)
 
     def shot(self, _x, _y):
         _dot = Dot(_x, _y)
@@ -208,7 +200,7 @@ class Player:
 class AI(Player):
     def ask(self):
         while True:
-            _x, _y = random.randint(1, 6), random.randint(1, 6)
+            _x, _y = randint(1, 6), randint(1, 6)
             if Board.out(Dot(_x, _y)):
                 raise BoardOutException("Targeting the dot out of bounds")
             else:
