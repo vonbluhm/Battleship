@@ -153,7 +153,7 @@ class Board:
                 self.char_map[_x][_y] = "X"
                 ships_checked = 0
                 for i in self.fleet:
-                    if _dot in i.dots():
+                    if _dot in i.dots:
                         i.lives -= 1
                         if i.lives:
                             print("Hit!")
